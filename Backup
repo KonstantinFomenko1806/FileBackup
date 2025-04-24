@@ -1,0 +1,234 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <filesystem>
+#include <windows.h>
+#pragma warning(disable:4996)
+
+std::string getCurrentDate() 
+{
+    std::time_t now = std::time(nullptr);
+    std::tm now_tm = *std::localtime(&now);
+
+    // Форматирование строки с текущей датой
+    std::ostringstream oss;
+    oss << std::put_time(&now_tm, "%Y-%m-%d_%H-%M-%S");
+    return oss.str();
+}
+
+// Возвращаем расширение файла
+std::string getFileExtension(const std::string& filename) 
+{
+    size_t dot_pos = filename.find_last_of(".");
+    if (dot_pos != std::string::npos) 
+    {
+        return filename.substr(dot_pos);
+    }
+
+    // Если расширения нет, возвращаем пустую строку
+    return "";                                                    
+}
+
+
+
+bool copyFile(const std::string& sourcePath, const std::string& destinationDir, const std::string& FileName) 
+{
+    std::ifstream source(sourcePath, std::ios::binary);
+
+    //Запись времени
+    std::string Name = getCurrentDate();  
+
+    std::string fileName = sourcePath.substr(sourcePath.find_last_of("/\\") + 1);  //???
+
+    //Возвращаем значение расширения файла
+    std::string fileExtension = getFileExtension(fileName);   
+
+    //Записываем путь куда копировать файл  
+    std::string newFileName = destinationDir + "/" + "/" + Name + "/" + FileName + fileExtension;
+
+    //Проверка с вызовом функции создания лога
+    if (!source)
+    {
+        std::ofstream out("C:/TEST2/log.txt", std::ios::app);
+        if (out.is_open())
+        {
+            out << getCurrentDate() + " Error dont open file read " << std::endl;
+        }
+        out.close();
+        return false;
+    }
+
+    // Создание папки с уникальным именем в указанном каталоге
+    std::filesystem::create_directory(destinationDir + "/" + Name);                 
+
+    //Проверка с вызовом функции создания лога
+    std::ofstream destination(newFileName, std::ios::binary);
+    if (!destination)
+    {
+        std::ofstream out("C:/TEST2/log.txt", std::ios::app);
+        if (out.is_open())
+        {
+            out << getCurrentDate() + " Error dont open file " << std::endl;
+        }
+        out.close();
+        return false;
+    }
+
+    // Копируем содержимое
+    destination << source.rdbuf();  
+
+    // Успешное копирование
+    return true;                       
+}
+
+int main()
+{
+    //Спрятать окно консоли
+    HWND hWnd = GetConsoleWindow();
+    ShowWindow(hWnd, SW_HIDE);  
+
+    //Объявление переменных
+    int day_old = 0;
+    std::string sourceFile;
+    std::string destinationDirectory;
+    std::string FileName;
+
+    //Запускаем вечный цикл
+    for (bool i = false; i == false; )
+    {
+        //запись текущего числа tm_mday
+        std::time_t now = std::time(0);
+        std::tm* ltm = std::localtime(&now);
+        int day_new = ltm->tm_mday;                 
+
+        //запись текущего времени, часы
+        std::time_t now3 = std::time(0);
+        std::tm* ltm3 = std::localtime(&now3);
+        int hour = ltm3->tm_hour;                   
+
+        //Проверка времени
+        if (day_new != day_old && hour == 9)                                                      
+        {
+            //Путь к исходному файлу к базе данных Алармов
+            sourceFile = "D:/Data/ALARMLOG.001";   
+
+            //Папка назначения
+            destinationDirectory = "E:/ALARM";   
+
+            //Имя файла без расширения
+            FileName = "ALARMLOG";
+
+            //Вызов функции копирования
+            if (copyFile(sourceFile, destinationDirectory, FileName))
+            {
+                //Открываем файл
+                std::ofstream out("E:/log.txt", std::ios::app);
+
+                if (out.is_open())
+                {
+                    //Пишем отчет в лог о успешном копировании
+                    out << getCurrentDate() + " Copy file 'ALARMLOG.001' complete " << std::endl;
+                }
+
+                //Закрываем файл
+                out.close();
+            }
+
+            else
+            {
+                //Открывем файл
+                std::ofstream out("E:/log.txt", std::ios::app);
+
+                if (out.is_open())
+                {
+                    //Пишем отчет в лог о ошибке
+                    out << getCurrentDate() + " Eror copy file 'ALARMLOG.001' " << std::endl;
+                }
+
+                //Закрываем файл
+                out.close();
+            }
+
+            //Путь к исходному файлу к базе Налива
+            sourceFile = "C:/ProgramData/MySQL/MySQL Server 8.0/Data/atlaspulkovodb/naliv.ibd"; 
+
+            //Папка назначения
+            destinationDirectory = "E:/NALIV"; 
+
+            //Имя файла без расширения
+            FileName = "naliv";
+
+            //Вызов функции копирования
+            if (copyFile(sourceFile, destinationDirectory, FileName))
+            {
+                //Открываем файл
+                std::ofstream out("E:/log.txt", std::ios::app);
+                if (out.is_open())
+                {
+                    //Пишем отчет в лог о успешном копировании
+                    out << getCurrentDate() + " Copy file 'naliv.ibd' complete " << std::endl;
+                }
+
+                //Закрываем файл
+                out.close();
+            }
+
+            else
+            {
+                //Открываем файл
+                std::ofstream out("E:/log.txt", std::ios::app);
+
+                if (out.is_open())
+                {
+                    //Пишем отчет в лог о ошибке
+                    out << getCurrentDate() + " Eror copy file 'naliv.ibd' " << std::endl;
+                }
+
+                //Закрываем файл
+                out.close();
+            }
+
+            //Путь к исходному файлу к базе Слива
+            sourceFile = "C:/ProgramData/MySQL/MySQL Server 8.0/Data/atlaspulkovodb/sliv.ibd";
+
+            //Папка назначения
+            destinationDirectory = "E:/SLIV";    
+
+            //Имя файла без расширения
+            FileName = "sliv";
+
+            //Вызываем функцию копирования файла
+            if (copyFile(sourceFile, destinationDirectory, FileName))
+            {
+                //Открываем файл
+                std::ofstream out("E:/log.txt", std::ios::app);
+                if (out.is_open())
+                {
+                    //Пишем в лог о успешном копировании 
+                    out << getCurrentDate() + " Copy file 'sliv.ibd' complete " << std::endl;
+                }
+
+                //Закрываем файл
+                out.close();
+            }
+
+            else
+            {
+                //Открываем файл
+                std::ofstream out("C:/TEST2/log.txt", std::ios::app);
+                if (out.is_open())
+                {
+                    //Пишем в лог о ошибке копирования 
+                    out << getCurrentDate() + " Eror copy file 'sliv.ibd' " << std::endl;
+                }
+
+                //Закрываем файл
+                out.close();
+            }
+
+            //Обновляем переменную для проверки условия выполнения цикла 
+            day_old = day_new;
+        }
+    }
+}
