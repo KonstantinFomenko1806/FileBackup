@@ -30,8 +30,6 @@ std::string getFileExtension(const std::string& filename)
     return "";                                                    
 }
 
-
-
 bool copyFile(const std::string& sourcePath, const std::string& destinationDir, const std::string& FileName) 
 {
     std::ifstream source(sourcePath, std::ios::binary);
